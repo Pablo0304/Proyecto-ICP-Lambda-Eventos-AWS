@@ -1,0 +1,27 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "SNS topic and subscription",
+  "Parameters": {
+    "PipelineName": { "Type": "String" },
+    "EmailAddress": { "Type": "String" }
+  },
+  "Resources": {
+    "CompressionTopic": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "TopicName": { "Fn::Sub": "NotifyMe_${PipelineName}" }
+      }
+    },
+    "EmailSubscription": {
+      "Type": "AWS::SNS::Subscription",
+      "Properties": {
+        "Protocol": "email",
+        "Endpoint": { "Ref": "EmailAddress" },
+        "TopicArn": { "Ref": "CompressionTopic" }
+      }
+    }
+  },
+  "Outputs": {
+    "SnsTopicArn": { "Value": { "Ref": "CompressionTopic" } }
+  }
+}

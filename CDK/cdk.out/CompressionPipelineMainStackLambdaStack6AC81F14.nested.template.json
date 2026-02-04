@@ -1,0 +1,642 @@
+{
+ "Resources": {
+  "StartStateMachine": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Ref": "referencetoCompressionPipelineMainStackTemplateBucketNameAB0BD7AERef"
+     },
+     "S3Key": {
+      "Fn::Sub": [
+       "${CodePrefix}/lambdas/StartStateMachine/StartStateMachine.zip",
+       {
+        "CodePrefix": {
+         "Ref": "referencetoCompressionPipelineMainStackTemplatePrefix2AAC3E8ERef"
+        }
+       }
+      ]
+     }
+    },
+    "Environment": {
+     "Variables": {
+      "STATE_MACHINE_NAME": {
+       "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+      }
+     }
+    },
+    "FunctionName": {
+     "Fn::Sub": [
+      "${PipelineName}-StartStateMachine",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    },
+    "Handler": "index.handler",
+    "MemorySize": 256,
+    "Role": "arn:aws:iam::974349055189:role/cursocloudaws-lambda-serverless-role",
+    "Runtime": "nodejs18.x",
+    "Timeout": 30,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/LambdaStack/StartStateMachine"
+   }
+  },
+  "InspectObject": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Ref": "referencetoCompressionPipelineMainStackTemplateBucketNameAB0BD7AERef"
+     },
+     "S3Key": {
+      "Fn::Sub": [
+       "${CodePrefix}/lambdas/InspectObject/InspectObject.zip",
+       {
+        "CodePrefix": {
+         "Ref": "referencetoCompressionPipelineMainStackTemplatePrefix2AAC3E8ERef"
+        }
+       }
+      ]
+     }
+    },
+    "FunctionName": {
+     "Fn::Sub": [
+      "${PipelineName}-InspectObject",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    },
+    "Handler": "index.handler",
+    "MemorySize": 512,
+    "Role": "arn:aws:iam::974349055189:role/cursocloudaws-lambda-serverless-role",
+    "Runtime": "nodejs18.x",
+    "Timeout": 60,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/LambdaStack/InspectObject"
+   }
+  },
+  "PrepareArtifact": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Ref": "referencetoCompressionPipelineMainStackTemplateBucketNameAB0BD7AERef"
+     },
+     "S3Key": {
+      "Fn::Sub": [
+       "${CodePrefix}/lambdas/PrepareArtifact/PrepareArtifact.zip",
+       {
+        "CodePrefix": {
+         "Ref": "referencetoCompressionPipelineMainStackTemplatePrefix2AAC3E8ERef"
+        }
+       }
+      ]
+     }
+    },
+    "FunctionName": {
+     "Fn::Sub": [
+      "${PipelineName}-PrepareArtifact",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    },
+    "Handler": "index.handler",
+    "MemorySize": 1024,
+    "Role": "arn:aws:iam::974349055189:role/cursocloudaws-lambda-serverless-role",
+    "Runtime": "nodejs18.x",
+    "Timeout": 120,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/LambdaStack/PrepareArtifact"
+   }
+  },
+  "ExtremeCompression": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Ref": "referencetoCompressionPipelineMainStackTemplateBucketNameAB0BD7AERef"
+     },
+     "S3Key": {
+      "Fn::Sub": [
+       "${CodePrefix}/lambdas/ExtremeCompression/ExtremeCompression.zip",
+       {
+        "CodePrefix": {
+         "Ref": "referencetoCompressionPipelineMainStackTemplatePrefix2AAC3E8ERef"
+        }
+       }
+      ]
+     }
+    },
+    "FunctionName": {
+     "Fn::Sub": [
+      "${PipelineName}-ExtremeCompression",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    },
+    "Handler": "index.handler",
+    "MemorySize": 4096,
+    "Role": "arn:aws:iam::974349055189:role/cursocloudaws-lambda-serverless-role",
+    "Runtime": "nodejs18.x",
+    "Timeout": 900,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/LambdaStack/ExtremeCompression"
+   }
+  },
+  "StoreFinalObject": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Ref": "referencetoCompressionPipelineMainStackTemplateBucketNameAB0BD7AERef"
+     },
+     "S3Key": {
+      "Fn::Sub": [
+       "${CodePrefix}/lambdas/StoreFinalObject/StoreFinalObject.zip",
+       {
+        "CodePrefix": {
+         "Ref": "referencetoCompressionPipelineMainStackTemplatePrefix2AAC3E8ERef"
+        }
+       }
+      ]
+     }
+    },
+    "FunctionName": {
+     "Fn::Sub": [
+      "${PipelineName}-StoreFinalObject",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    },
+    "Handler": "index.handler",
+    "MemorySize": 1024,
+    "Role": "arn:aws:iam::974349055189:role/cursocloudaws-lambda-serverless-role",
+    "Runtime": "nodejs18.x",
+    "Timeout": 120,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/LambdaStack/StoreFinalObject"
+   }
+  },
+  "NotifyUser": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Ref": "referencetoCompressionPipelineMainStackTemplateBucketNameAB0BD7AERef"
+     },
+     "S3Key": {
+      "Fn::Sub": [
+       "${CodePrefix}/lambdas/NotifyUser/NotifyUser.zip",
+       {
+        "CodePrefix": {
+         "Ref": "referencetoCompressionPipelineMainStackTemplatePrefix2AAC3E8ERef"
+        }
+       }
+      ]
+     }
+    },
+    "FunctionName": {
+     "Fn::Sub": [
+      "${PipelineName}-NotifyUser",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    },
+    "Handler": "index.handler",
+    "MemorySize": 256,
+    "Role": "arn:aws:iam::974349055189:role/cursocloudaws-lambda-serverless-role",
+    "Runtime": "nodejs18.x",
+    "Timeout": 30,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/LambdaStack/NotifyUser"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zPSMzI21zNUTCwv1k1OydbNyUzSq/ZLLS5JTQkuSUzO1kksL47PScxNSknUc07LcyvNSy7JzM/TcU7L8y8tKSgtqdXJy09J1csq1i8zMtAztNQzU8wqzszULSrNK8nMTdULgtAABTkarmgAAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/LambdaStack/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Outputs": {
+  "StartStateMachineLambdaArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "StartStateMachine",
+     "Arn"
+    ]
+   }
+  },
+  "InspectObjectLambdaArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "InspectObject",
+     "Arn"
+    ]
+   }
+  },
+  "PrepareArtifactLambdaArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "PrepareArtifact",
+     "Arn"
+    ]
+   }
+  },
+  "ExtremeCompressionLambdaArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ExtremeCompression",
+     "Arn"
+    ]
+   }
+  },
+  "StoreFinalObjectLambdaArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "StoreFinalObject",
+     "Arn"
+    ]
+   }
+  },
+  "NotifyUserLambdaArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "NotifyUser",
+     "Arn"
+    ]
+   }
+  },
+  "CompressionPipelineMainStackLambdaStackStartStateMachineB2AA955FArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "StartStateMachine",
+     "Arn"
+    ]
+   }
+  },
+  "CompressionPipelineMainStackLambdaStackInspectObject93A05E68Arn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "InspectObject",
+     "Arn"
+    ]
+   }
+  },
+  "CompressionPipelineMainStackLambdaStackPrepareArtifactDDCE6A14Arn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "PrepareArtifact",
+     "Arn"
+    ]
+   }
+  },
+  "CompressionPipelineMainStackLambdaStackExtremeCompression60354514Arn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ExtremeCompression",
+     "Arn"
+    ]
+   }
+  },
+  "CompressionPipelineMainStackLambdaStackStoreFinalObjectAF955083Arn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "StoreFinalObject",
+     "Arn"
+    ]
+   }
+  },
+  "CompressionPipelineMainStackLambdaStackNotifyUser3CBC5990Arn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "NotifyUser",
+     "Arn"
+    ]
+   }
+  }
+ },
+ "Conditions": {
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-3"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-4"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "il-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AWS::Region"
+      },
+      "us-west-2"
+     ]
+    }
+   ]
+  }
+ },
+ "Parameters": {
+  "referencetoCompressionPipelineMainStackTemplateBucketNameAB0BD7AERef": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackTemplatePrefix2AAC3E8ERef": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref": {
+   "Type": "String"
+  }
+ }
+}

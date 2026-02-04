@@ -1,0 +1,31 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Step Functions state machine",
+  "Parameters": {
+    "PipelineName": { "Type": "String" },
+    "StepFunctionsRoleArn": { "Type": "String" },
+    "InspectObjectLambdaArn": { "Type": "String" },
+    "PrepareArtifactLambdaArn": { "Type": "String" },
+    "ExtremeCompressionLambdaArn": { "Type": "String" },
+    "StoreFinalObjectLambdaArn": { "Type": "String" },
+    "NotifyUserLambdaArn": { "Type": "String" },
+    "ArtifactsBucketName": { "Type": "String" },
+    "OutputBucketName": { "Type": "String" },
+    "SnsTopicArn": { "Type": "String" }
+  },
+  "Resources": {
+    "CompressionStateMachine": {
+      "Type": "AWS::StepFunctions::StateMachine",
+      "Properties": {
+        "StateMachineName": { "Ref": "PipelineName" },
+        "RoleArn": { "Ref": "StepFunctionsRoleArn" },
+        "DefinitionString": {
+          "Fn::Sub": "{\n  \"Comment\": \"Extreme compression pipeline\",\n  \"StartAt\": \"InspectObject\",\n  \"States\": {\n    \"InspectObject\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${InspectObjectLambdaArn}\",\n      \"Parameters\": {\n        \"sourceBucket.$\": \"$.sourceBucket\",\n        \"sourceKey.$\": \"$.sourceKey\"\n      },\n      \"ResultPath\": \"$.inspect\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 3,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"Next\": \"PrepareArtifact\"\n    },\n    \"PrepareArtifact\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${PrepareArtifactLambdaArn}\",\n      \"Parameters\": {\n        \"sourceBucket.$\": \"$.sourceBucket\",\n        \"sourceKey.$\": \"$.sourceKey\",\n        \"artifactsBucket\": \"${ArtifactsBucketName}\"\n      },\n      \"ResultPath\": \"$.prepared\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 3,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"Next\": \"ExtremeCompression\"\n    },\n    \"ExtremeCompression\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${ExtremeCompressionLambdaArn}\",\n      \"Parameters\": {\n        \"artifactsBucket.$\": \"$.prepared.artifactsBucket\",\n        \"artifactKey.$\": \"$.prepared.artifactKey\",\n        \"compression\": {\n          \"algorithm\": \"gzip\",\n          \"level\": 9\n        }\n      },\n      \"ResultPath\": \"$.compressed\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 2,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"Next\": \"StoreFinalObject\"\n    },\n    \"StoreFinalObject\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${StoreFinalObjectLambdaArn}\",\n      \"Parameters\": {\n        \"artifactsBucket.$\": \"$.compressed.artifactsBucket\",\n        \"compressedKey.$\": \"$.compressed.compressedKey\",\n        \"outputBucket\": \"${OutputBucketName}\"\n      },\n      \"ResultPath\": \"$.stored\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 3,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"Next\": \"NotifyUser\"\n    },\n    \"NotifyUser\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${NotifyUserLambdaArn}\",\n      \"Parameters\": {\n        \"topicArn\": \"${SnsTopicArn}\",\n        \"message.$\": \"States.Format('Compression complete for {}', $.sourceKey)\",\n        \"details.$\": \"$.stored\"\n      },\n      \"ResultPath\": \"$.notified\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 2,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"End\": true\n    },\n    \"Fail\": {\n      \"Type\": \"Fail\",\n      \"Error\": \"CompressionFailed\",\n      \"Cause\": \"Pipeline failure\"\n    }\n  }\n}"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "StateMachineArn": { "Value": { "Ref": "CompressionStateMachine" } }
+  }
+}

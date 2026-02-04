@@ -1,0 +1,118 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Lambda functions for compression pipeline",
+  "Parameters": {
+    "PipelineName": { "Type": "String" },
+    "CodeBucketName": { "Type": "String" },
+    "CodePrefix": { "Type": "String" },
+    "StartStateMachineRoleArn": { "Type": "String" },
+    "WorkerLambdaRoleArn": { "Type": "String" }
+  },
+  "Resources": {
+    "StartStateMachine": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": { "Fn::Sub": "${PipelineName}-StartStateMachine" },
+        "Runtime": "nodejs18.x",
+        "Handler": "index.handler",
+        "Role": { "Ref": "StartStateMachineRoleArn" },
+        "Timeout": 30,
+        "MemorySize": 256,
+        "TracingConfig": { "Mode": "Active" },
+        "Environment": { "Variables": { "STATE_MACHINE_NAME": { "Ref": "PipelineName" } } },
+        "Code": {
+          "S3Bucket": { "Ref": "CodeBucketName" },
+          "S3Key": { "Fn::Sub": "${CodePrefix}/lambdas/StartStateMachine/StartStateMachine.zip" }
+        }
+      }
+    },
+    "InspectObject": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": { "Fn::Sub": "${PipelineName}-InspectObject" },
+        "Runtime": "nodejs18.x",
+        "Handler": "index.handler",
+        "Role": { "Ref": "WorkerLambdaRoleArn" },
+        "Timeout": 60,
+        "MemorySize": 512,
+        "TracingConfig": { "Mode": "Active" },
+        "Code": {
+          "S3Bucket": { "Ref": "CodeBucketName" },
+          "S3Key": { "Fn::Sub": "${CodePrefix}/lambdas/InspectObject/InspectObject.zip" }
+        }
+      }
+    },
+    "PrepareArtifact": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": { "Fn::Sub": "${PipelineName}-PrepareArtifact" },
+        "Runtime": "nodejs18.x",
+        "Handler": "index.handler",
+        "Role": { "Ref": "WorkerLambdaRoleArn" },
+        "Timeout": 120,
+        "MemorySize": 1024,
+        "TracingConfig": { "Mode": "Active" },
+        "Code": {
+          "S3Bucket": { "Ref": "CodeBucketName" },
+          "S3Key": { "Fn::Sub": "${CodePrefix}/lambdas/PrepareArtifact/PrepareArtifact.zip" }
+        }
+      }
+    },
+    "ExtremeCompression": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": { "Fn::Sub": "${PipelineName}-ExtremeCompression" },
+        "Runtime": "nodejs18.x",
+        "Handler": "index.handler",
+        "Role": { "Ref": "WorkerLambdaRoleArn" },
+        "Timeout": 900,
+        "MemorySize": 4096,
+        "TracingConfig": { "Mode": "Active" },
+        "Code": {
+          "S3Bucket": { "Ref": "CodeBucketName" },
+          "S3Key": { "Fn::Sub": "${CodePrefix}/lambdas/ExtremeCompression/ExtremeCompression.zip" }
+        }
+      }
+    },
+    "StoreFinalObject": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": { "Fn::Sub": "${PipelineName}-StoreFinalObject" },
+        "Runtime": "nodejs18.x",
+        "Handler": "index.handler",
+        "Role": { "Ref": "WorkerLambdaRoleArn" },
+        "Timeout": 120,
+        "MemorySize": 1024,
+        "TracingConfig": { "Mode": "Active" },
+        "Code": {
+          "S3Bucket": { "Ref": "CodeBucketName" },
+          "S3Key": { "Fn::Sub": "${CodePrefix}/lambdas/StoreFinalObject/StoreFinalObject.zip" }
+        }
+      }
+    },
+    "NotifyUser": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": { "Fn::Sub": "${PipelineName}-NotifyUser" },
+        "Runtime": "nodejs18.x",
+        "Handler": "index.handler",
+        "Role": { "Ref": "WorkerLambdaRoleArn" },
+        "Timeout": 30,
+        "MemorySize": 256,
+        "TracingConfig": { "Mode": "Active" },
+        "Code": {
+          "S3Bucket": { "Ref": "CodeBucketName" },
+          "S3Key": { "Fn::Sub": "${CodePrefix}/lambdas/NotifyUser/NotifyUser.zip" }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "StartStateMachineLambdaArn": { "Value": { "Fn::GetAtt": ["StartStateMachine", "Arn"] } },
+    "InspectObjectLambdaArn": { "Value": { "Fn::GetAtt": ["InspectObject", "Arn"] } },
+    "PrepareArtifactLambdaArn": { "Value": { "Fn::GetAtt": ["PrepareArtifact", "Arn"] } },
+    "ExtremeCompressionLambdaArn": { "Value": { "Fn::GetAtt": ["ExtremeCompression", "Arn"] } },
+    "StoreFinalObjectLambdaArn": { "Value": { "Fn::GetAtt": ["StoreFinalObject", "Arn"] } },
+    "NotifyUserLambdaArn": { "Value": { "Fn::GetAtt": ["NotifyUser", "Arn"] } }
+  }
+}

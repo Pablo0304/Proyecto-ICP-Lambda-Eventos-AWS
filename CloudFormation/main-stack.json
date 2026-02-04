@@ -1,0 +1,111 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Lambda-only compression pipeline with nested stacks",
+  "Parameters": {
+    "EmailAddress": { "Type": "String", "Default": "gonca.pablo@gmail.com" },
+    "PipelineName": { "Type": "String", "Default": "alucloud85" },
+    "TemplateBucketName": { "Type": "String", "Default": "alucloud" },
+    "TemplatePrefix": { "Type": "String", "Default": "85" }
+  },
+  "Resources": {
+    "LambdaStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": "https://s3.amazonaws.com/${TemplateBucketName}/${TemplatePrefix}/lambda-stack.json"
+        },
+        "Parameters": {
+          "PipelineName": { "Ref": "PipelineName" },
+          "CodeBucketName": { "Ref": "TemplateBucketName" },
+          "CodePrefix": { "Ref": "TemplatePrefix" },
+          "StartStateMachineRoleArn": "arn:aws:iam::974349055189:role/cursocloudaws-lambda-serverless-role",
+          "WorkerLambdaRoleArn": "arn:aws:iam::974349055189:role/cursocloudaws-lambda-serverless-role"
+        }
+      }
+    },
+    "S3Stack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": ["LambdaStack"],
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": "https://s3.amazonaws.com/${TemplateBucketName}/${TemplatePrefix}/s3-stack.json"
+        },
+        "Parameters": {
+          "PipelineName": { "Ref": "PipelineName" },
+          "StartStateMachineLambdaArn": {
+            "Fn::GetAtt": ["LambdaStack", "Outputs.StartStateMachineLambdaArn"]
+          }
+        }
+      }
+    },
+    "SnsStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": "https://s3.amazonaws.com/${TemplateBucketName}/${TemplatePrefix}/sns-stack.json"
+        },
+        "Parameters": {
+          "PipelineName": { "Ref": "PipelineName" },
+          "EmailAddress": { "Ref": "EmailAddress" }
+        }
+      }
+    },
+    "SfnStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": ["LambdaStack", "SnsStack", "S3Stack"],
+      "Properties": {
+        "TemplateURL": {
+          "Fn::Sub": "https://s3.amazonaws.com/${TemplateBucketName}/${TemplatePrefix}/sfn-stack.json"
+        },
+        "Parameters": {
+          "PipelineName": { "Ref": "PipelineName" },
+          "StepFunctionsRoleArn": "arn:aws:iam::974349055189:role/cursocloudaws-events-workflows-states-role",
+          "InspectObjectLambdaArn": {
+            "Fn::GetAtt": ["LambdaStack", "Outputs.InspectObjectLambdaArn"]
+          },
+          "PrepareArtifactLambdaArn": {
+            "Fn::GetAtt": ["LambdaStack", "Outputs.PrepareArtifactLambdaArn"]
+          },
+          "ExtremeCompressionLambdaArn": {
+            "Fn::GetAtt": ["LambdaStack", "Outputs.ExtremeCompressionLambdaArn"]
+          },
+          "StoreFinalObjectLambdaArn": {
+            "Fn::GetAtt": ["LambdaStack", "Outputs.StoreFinalObjectLambdaArn"]
+          },
+          "NotifyUserLambdaArn": {
+            "Fn::GetAtt": ["LambdaStack", "Outputs.NotifyUserLambdaArn"]
+          },
+          "ArtifactsBucketName": {
+            "Fn::GetAtt": ["S3Stack", "Outputs.ArtifactsBucketName"]
+          },
+          "OutputBucketName": {
+            "Fn::GetAtt": ["S3Stack", "Outputs.OutputBucketName"]
+          },
+          "SnsTopicArn": { "Fn::GetAtt": ["SnsStack", "Outputs.SnsTopicArn"] }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "InputBucketName": {
+      "Value": { "Fn::GetAtt": ["S3Stack", "Outputs.InputBucketName"] }
+    },
+    "ArtifactsBucketName": {
+      "Value": { "Fn::GetAtt": ["S3Stack", "Outputs.ArtifactsBucketName"] }
+    },
+    "OutputBucketName": {
+      "Value": { "Fn::GetAtt": ["S3Stack", "Outputs.OutputBucketName"] }
+    },
+    "StateMachineArn": {
+      "Value": { "Fn::GetAtt": ["SfnStack", "Outputs.StateMachineArn"] }
+    },
+    "SnsTopicArn": {
+      "Value": { "Fn::GetAtt": ["SnsStack", "Outputs.SnsTopicArn"] }
+    },
+    "StartStateMachineLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": ["LambdaStack", "Outputs.StartStateMachineLambdaArn"]
+      }
+    }
+  }
+}

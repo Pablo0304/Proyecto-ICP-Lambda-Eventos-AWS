@@ -1,0 +1,76 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "949264fc855b6d929b42e7607bc886537f03f817931194a1e264e29123e2d5b9": {
+      "displayName": "LambdaStack Nested Stack Template",
+      "source": {
+        "path": "CompressionPipelineMainStackLambdaStack6AC81F14.nested.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-dafdb1f7": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "949264fc855b6d929b42e7607bc886537f03f817931194a1e264e29123e2d5b9.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    },
+    "2a0858a681a8b3a645b2d64d4db168d00ca607688b6ba56c53ffac9e5cf5c7f3": {
+      "displayName": "S3Stack Nested Stack Template",
+      "source": {
+        "path": "CompressionPipelineMainStackS3Stack60EE0D58.nested.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-1e6bc6b5": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "2a0858a681a8b3a645b2d64d4db168d00ca607688b6ba56c53ffac9e5cf5c7f3.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    },
+    "23e84e9d4b8386b624ac612adc27f9e7e891d28a128b964febcf13bae406d3ed": {
+      "displayName": "SnsStack Nested Stack Template",
+      "source": {
+        "path": "CompressionPipelineMainStackSnsStack0A761AF6.nested.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-0689c611": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "23e84e9d4b8386b624ac612adc27f9e7e891d28a128b964febcf13bae406d3ed.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    },
+    "9ab7485d652e0620e8ffeea88d16f8f35378ffa03c5c6ac0ba73148bdd272fc1": {
+      "displayName": "SfnStack Nested Stack Template",
+      "source": {
+        "path": "CompressionPipelineMainStackSfnStackCEF8F83F.nested.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-657420fd": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "9ab7485d652e0620e8ffeea88d16f8f35378ffa03c5c6ac0ba73148bdd272fc1.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    },
+    "91df0afbdfe02284e3e388550d60011aa9a48b00555f8dc6e4a508d013be88b7": {
+      "displayName": "CompressionPipelineMainStack Template",
+      "source": {
+        "path": "CompressionPipelineMainStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-929cc17a": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "91df0afbdfe02284e3e388550d60011aa9a48b00555f8dc6e4a508d013be88b7.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

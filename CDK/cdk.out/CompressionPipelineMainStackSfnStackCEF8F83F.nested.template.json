@@ -1,0 +1,364 @@
+{
+ "Resources": {
+  "CompressionStateMachine": {
+   "Type": "AWS::StepFunctions::StateMachine",
+   "Properties": {
+    "DefinitionString": {
+     "Fn::Sub": [
+      "{\n  \"Comment\": \"Extreme compression pipeline\",\n  \"StartAt\": \"InspectObject\",\n  \"States\": {\n    \"InspectObject\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${InspectObjectLambdaArn}\",\n      \"Parameters\": {\n        \"sourceBucket.$\": \"$.sourceBucket\",\n        \"sourceKey.$\": \"$.sourceKey\"\n      },\n      \"ResultPath\": \"$.inspect\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 3,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"Next\": \"PrepareArtifact\"\n    },\n    \"PrepareArtifact\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${PrepareArtifactLambdaArn}\",\n      \"Parameters\": {\n        \"sourceBucket.$\": \"$.sourceBucket\",\n        \"sourceKey.$\": \"$.sourceKey\",\n        \"artifactsBucket\": \"${ArtifactsBucketName}\"\n      },\n      \"ResultPath\": \"$.prepared\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 3,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"Next\": \"ExtremeCompression\"\n    },\n    \"ExtremeCompression\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${ExtremeCompressionLambdaArn}\",\n      \"Parameters\": {\n        \"artifactsBucket.$\": \"$.prepared.artifactsBucket\",\n        \"artifactKey.$\": \"$.prepared.artifactKey\",\n        \"compression\": {\n          \"algorithm\": \"gzip\",\n          \"level\": 9\n        }\n      },\n      \"ResultPath\": \"$.compressed\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 2,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"Next\": \"StoreFinalObject\"\n    },\n    \"StoreFinalObject\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${StoreFinalObjectLambdaArn}\",\n      \"Parameters\": {\n        \"artifactsBucket.$\": \"$.compressed.artifactsBucket\",\n        \"compressedKey.$\": \"$.compressed.compressedKey\",\n        \"outputBucket\": \"${OutputBucketName}\"\n      },\n      \"ResultPath\": \"$.stored\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 3,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"Next\": \"NotifyUser\"\n    },\n    \"NotifyUser\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${NotifyUserLambdaArn}\",\n      \"Parameters\": {\n        \"topicArn\": \"${SnsTopicArn}\",\n        \"message.$\": \"States.Format('Compression complete for {}', $.sourceKey)\",\n        \"details.$\": \"$.stored\"\n      },\n      \"ResultPath\": \"$.notified\",\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\",\n            \"States.TaskFailed\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 2,\n          \"BackoffRate\": 2.0\n        }\n      ],\n      \"Catch\": [\n        {\n          \"ErrorEquals\": [\"States.ALL\"],\n          \"ResultPath\": \"$.error\",\n          \"Next\": \"Fail\"\n        }\n      ],\n      \"End\": true\n    },\n    \"Fail\": {\n      \"Type\": \"Fail\",\n      \"Error\": \"CompressionFailed\",\n      \"Cause\": \"Pipeline failure\"\n    }\n  }\n}",
+      {
+       "InspectObjectLambdaArn": {
+        "Ref": "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackInspectObject93A05E68Arn"
+       },
+       "PrepareArtifactLambdaArn": {
+        "Ref": "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackPrepareArtifactDDCE6A14Arn"
+       },
+       "ExtremeCompressionLambdaArn": {
+        "Ref": "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackExtremeCompression60354514Arn"
+       },
+       "StoreFinalObjectLambdaArn": {
+        "Ref": "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackStoreFinalObjectAF955083Arn"
+       },
+       "NotifyUserLambdaArn": {
+        "Ref": "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackNotifyUser3CBC5990Arn"
+       },
+       "ArtifactsBucketName": {
+        "Ref": "referencetoCompressionPipelineMainStackS3StackNestedStackS3StackNestedStackResource443DE577OutputsCompressionPipelineMainStackS3StackArtifactsBucket4FBD424DRef"
+       },
+       "OutputBucketName": {
+        "Ref": "referencetoCompressionPipelineMainStackS3StackNestedStackS3StackNestedStackResource443DE577OutputsCompressionPipelineMainStackS3StackOutputBucket0657CEFBRef"
+       },
+       "SnsTopicArn": {
+        "Ref": "referencetoCompressionPipelineMainStackSnsStackNestedStackSnsStackNestedStackResource40EE66EBOutputsCompressionPipelineMainStackSnsStackCompressionTopic01223106Ref"
+       }
+      }
+     ]
+    },
+    "RoleArn": "arn:aws:iam::974349055189:role/cursocloudaws-events-workflows-states-role",
+    "StateMachineName": {
+     "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/SfnStack/CompressionStateMachine"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/yXFwQ6CMAwA0G/hvhWZiYQzZyWRDzB162JBC7GdHIz/7oF3eQHCsYWmwk19TLN/8h2+F1KjNBrG2eGmNzVac5FovIhCn2U0NDpjfLCQ67MMxdZiPydLIpi0/oQDNB2cqkmZ/buI8Yvguv8HKtBQo3MAAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/SfnStack/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Outputs": {
+  "StateMachineArn": {
+   "Value": {
+    "Ref": "CompressionStateMachine"
+   }
+  },
+  "CompressionPipelineMainStackSfnStackCompressionStateMachine444E9E3FRef": {
+   "Value": {
+    "Ref": "CompressionStateMachine"
+   }
+  }
+ },
+ "Conditions": {
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-3"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-4"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "il-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AWS::Region"
+      },
+      "us-west-2"
+     ]
+    }
+   ]
+  }
+ },
+ "Parameters": {
+  "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackInspectObject93A05E68Arn": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackPrepareArtifactDDCE6A14Arn": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackExtremeCompression60354514Arn": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackStoreFinalObjectAF955083Arn": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackNotifyUser3CBC5990Arn": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackS3StackNestedStackS3StackNestedStackResource443DE577OutputsCompressionPipelineMainStackS3StackArtifactsBucket4FBD424DRef": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackS3StackNestedStackS3StackNestedStackResource443DE577OutputsCompressionPipelineMainStackS3StackOutputBucket0657CEFBRef": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackSnsStackNestedStackSnsStackNestedStackResource40EE66EBOutputsCompressionPipelineMainStackSnsStackCompressionTopic01223106Ref": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref": {
+   "Type": "String"
+  }
+ }
+}

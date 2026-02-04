@@ -1,0 +1,501 @@
+{
+ "Resources": {
+  "StartStateMachineInvokePermission": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Ref": "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackStartStateMachineB2AA955FArn"
+    },
+    "Principal": "s3.amazonaws.com",
+    "SourceArn": {
+     "Fn::Sub": [
+      "arn:aws:s3:::${PipelineName}-input",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/S3Stack/StartStateMachineInvokePermission"
+   }
+  },
+  "InputBucket": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": {
+     "Fn::Sub": [
+      "${PipelineName}-input",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    },
+    "NotificationConfiguration": {
+     "LambdaConfigurations": [
+      {
+       "Event": "s3:ObjectCreated:*",
+       "Function": {
+        "Ref": "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackStartStateMachineB2AA955FArn"
+       }
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    }
+   },
+   "DependsOn": [
+    "StartStateMachineInvokePermission"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/S3Stack/InputBucket"
+   }
+  },
+  "ArtifactsBucket": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": {
+     "Fn::Sub": [
+      "${PipelineName}-artifacts",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/S3Stack/ArtifactsBucket"
+   }
+  },
+  "OutputBucket": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": {
+     "Fn::Sub": [
+      "${PipelineName}-output",
+      {
+       "PipelineName": {
+        "Ref": "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref"
+       }
+      }
+     ]
+    },
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "Id": "ColdStorageLifecycle",
+       "Status": "Enabled",
+       "Transitions": [
+        {
+         "StorageClass": "STANDARD_IA",
+         "TransitionInDays": 30
+        },
+        {
+         "StorageClass": "GLACIER",
+         "TransitionInDays": 90
+        },
+        {
+         "StorageClass": "DEEP_ARCHIVE",
+         "TransitionInDays": 180
+        }
+       ]
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/S3Stack/OutputBucket"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/yXIwQ6CMAwA0G/hvlUZicar3MXoB5ixlaSMFUM7ORD+3RhPL3kOXHOGuvKr2BCTnaiH7YaiGJ/qQzJ+ldc2+dxHD+3Ad1wyidDMRppfXEtIqLtpB+6KvovuhueIMMrh445QX+BUjUJkl8JKGeHx9wsb10k9eQAAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "CompressionPipelineMainStack/S3Stack/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Outputs": {
+  "InputBucketName": {
+   "Value": {
+    "Ref": "InputBucket"
+   }
+  },
+  "ArtifactsBucketName": {
+   "Value": {
+    "Ref": "ArtifactsBucket"
+   }
+  },
+  "OutputBucketName": {
+   "Value": {
+    "Ref": "OutputBucket"
+   }
+  },
+  "InputBucketArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "InputBucket",
+     "Arn"
+    ]
+   }
+  },
+  "ArtifactsBucketArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ArtifactsBucket",
+     "Arn"
+    ]
+   }
+  },
+  "OutputBucketArn": {
+   "Value": {
+    "Fn::GetAtt": [
+     "OutputBucket",
+     "Arn"
+    ]
+   }
+  },
+  "CompressionPipelineMainStackS3StackArtifactsBucket4FBD424DRef": {
+   "Value": {
+    "Ref": "ArtifactsBucket"
+   }
+  },
+  "CompressionPipelineMainStackS3StackOutputBucket0657CEFBRef": {
+   "Value": {
+    "Ref": "OutputBucket"
+   }
+  },
+  "CompressionPipelineMainStackS3StackInputBucketACC5DAB7Ref": {
+   "Value": {
+    "Ref": "InputBucket"
+   }
+  }
+ },
+ "Conditions": {
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-3"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-4"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "il-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AWS::Region"
+      },
+      "us-west-2"
+     ]
+    }
+   ]
+  }
+ },
+ "Parameters": {
+  "referencetoCompressionPipelineMainStackLambdaStackNestedStackLambdaStackNestedStackResource7A679B27OutputsCompressionPipelineMainStackLambdaStackStartStateMachineB2AA955FArn": {
+   "Type": "String"
+  },
+  "referencetoCompressionPipelineMainStackPipelineNameAC47E475Ref": {
+   "Type": "String"
+  }
+ }
+}
